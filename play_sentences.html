@@ -85,21 +85,38 @@
   </div>
 
   <script>
-    // Use RELATIVE paths so it works for both root and /docs deployments
-    const audioMap = {
-      hp56: { silence: "./audio/HP56.wav",  snr10: "./audio/HP56_snr10.wav" },
-      lp56: { silence: "./audio/LP56.wav",  snr10: "./audio/LP56_snr10.wav" },
-      f56b: { silence: "./audio/F56b.wav",  snr10: "./audio/F56b_snr10.wav" }
+    // --- Robust path handling: auto-detect where the `audio/` folder is ---
+    async function detectAudioPrefix() {
+      const candidates = [
+        './audio/',          // same folder as index.html
+        '../audio/',         // index.html is in /docs, audio is at repo root
+        window.location.pathname.replace(/[^/]*$/, '') + 'audio/' // absolute under repo subpath
+      ];
+      for (const pref of candidates) {
+        try {
+          const testUrl = pref + 'HP56.wav';
+          const res = await fetch(testUrl, { method: 'HEAD', cache: 'no-store' });
+          if (res.ok) return pref;
+        } catch (e) { /* continue */ }
+      }
+      return null;
+    }
+
+    const IDS = ['hp56','lp56','f56b'];
+    const FILES = {
+      hp56: { silence: 'HP56.wav',  snr10: 'HP56_snr10.wav' },
+      lp56: { silence: 'LP56.wav',  snr10: 'LP56_snr10.wav' },
+      f56b: { silence: 'F56b.wav',  snr10: 'F56b_snr10.wav' }
     };
 
+    let audioMap = null; // will be filled after prefix detection
     let currentAudio = null;
     let currentBtn = null;
 
     function stopCurrent() {
       if (currentAudio) { currentAudio.pause(); currentAudio.currentTime = 0; }
-      if (currentBtn) { currentBtn.classList.remove("playing"); currentBtn.classList.remove("noise"); }
-      currentAudio = null;
-      currentBtn = null;
+      if (currentBtn) { currentBtn.classList.remove('playing'); currentBtn.classList.remove('noise'); }
+      currentAudio = null; currentBtn = null;
     }
 
     function playSrc(btn, src, isNoise){
@@ -115,7 +132,7 @@
 
     document.getElementById('grid').addEventListener('click', (e) => {
       const btn = e.target.closest('button.card');
-      if (!btn) return;
+      if (!btn || !audioMap) return;
       const id = btn.getAttribute('data-id');
       const variant = btn.getAttribute('data-variant');
       const src = audioMap[id]?.[variant];
@@ -124,8 +141,8 @@
       playSrc(btn, src, variant === 'snr10');
     });
 
-    // Keyboard: 1..3 → Silence, 4..6 → +10 dB
     window.addEventListener('keydown', (ev) => {
+      if (!audioMap) return;
       const map = {
         '1':['hp56','silence'], '2':['lp56','silence'], '3':['f56b','silence'],
         '4':['hp56','snr10'],   '5':['lp56','snr10'],   '6':['f56b','snr10']
@@ -136,18 +153,40 @@
       if (btn) btn.click();
     });
 
-    // Optional: quick self-test panel to verify files exist
-    (async function selfTest(){
-      const files = Object.values(audioMap).flatMap(m => [m.silence, m.snr10]);
+    (async function init(){
       const box = document.createElement('div');
-      box.style.cssText="margin-top:12px;padding:10px;border:1px solid rgba(255,255,255,.2);border-radius:8px;color:#9fb0c6";
-      box.innerHTML = '<b>Self-test</b>: checking audio file availability...<br/>';
+      box.style.cssText = 'margin-top:12px;padding:10px;border:1px solid rgba(255,255,255,.2);border-radius:8px;color:#9fb0c6';
+      box.innerHTML = '<b>Self-test</b>: detecting audio folder...<br/>';
       document.querySelector('.wrap').appendChild(box);
-      for (const url of files) {
-        try {
-          const res = await fetch(url, { method: 'HEAD' });
-          box.innerHTML += `${res.ok ? '✅' : '❌'} ${url} ${res.ok ? '' : `(HTTP ${res.status})`}<br/>`;
-        } catch(e) { box.innerHTML += `❌ ${url} (fetch error)<br/>`; }
+
+      const prefix = await detectAudioPrefix();
+      if (!prefix) {
+        box.innerHTML += '❌ Could not locate the audio folder automatically. Make sure the folder <code>audio/</code> is either (a) next to this HTML file, or (b) one level above it.<br/>';
+        return;
+      }
+
+      box.innerHTML += `✅ Using prefix: <code>${prefix}</code><br/>`;
+
+      // Build the resolved audio map
+      audioMap = Object.fromEntries(IDS.map(id => {
+        const files = FILES[id];
+        return [id, {
+          silence: prefix + files.silence,
+          snr10:   prefix + files.snr10
+        }];
+      }));
+
+      // List reachability of all files
+      for (const id of IDS) {
+        for (const v of ['silence','snr10']) {
+          const url = audioMap[id][v];
+          try {
+            const res = await fetch(url, { method: 'HEAD', cache: 'no-store' });
+            box.innerHTML += `${res.ok ? '✅' : '❌'} ${url} ${res.ok ? '' : `(HTTP ${res.status})`}<br/>`;
+          } catch(e) {
+            box.innerHTML += `❌ ${url} (fetch error)<br/>`;
+          }
+        }
       }
     })();
   </script>
