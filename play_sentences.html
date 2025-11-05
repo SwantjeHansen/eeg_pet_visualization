@@ -1,5 +1,3 @@
-
-
 <!doctype html>
 <html lang="de">
 <head>
@@ -70,37 +68,37 @@
 
     <div id="grid" class="grid">
       <!-- Row 1: in Ruhe -->
-      <button class="card" data-id="waesche" data-variant="ruhe" aria-label="Wäsche in Ruhe abspielen">
+      <button class="card" data-id="hp56" data-variant="ruhe" aria-label="HP56 in Ruhe abspielen">
         <span class="rowTag">Ruhe</span>
         <span class="icon">🧺</span>
-        <div class="label">Wäsche</div>
+        <div class="label">HP56</div>
       </button>
-      <button class="card" data-id="reis" data-variant="ruhe" aria-label="Reis in Ruhe abspielen">
+      <button class="card" data-id="lp56" data-variant="ruhe" aria-label="LP56 in Ruhe abspielen">
         <span class="rowTag">Ruhe</span>
         <span class="icon">🍚</span>
-        <div class="label">Reis</div>
+        <div class="label">LP56</div>
       </button>
-      <button class="card" data-id="wolke" data-variant="ruhe" aria-label="Wolke in Ruhe abspielen">
+      <button class="card" data-id="f56b" data-variant="ruhe" aria-label="F56b in Ruhe abspielen">
         <span class="rowTag">Ruhe</span>
         <span class="icon">☁️</span>
-        <div class="label">Wolke</div>
+        <div class="label">F56b</div>
       </button>
 
       <!-- Row 2: +10 dB SNR -->
-      <button class="card noise" data-id="waesche" data-variant="snr10" aria-label="Wäsche im Störgeräusch abspielen">
+      <button class="card noise" data-id="hp56" data-variant="snr10" aria-label="HP56 im Störgeräusch abspielen">
         <span class="rowTag noise">+10 dB</span>
         <span class="icon">🧺</span>
-        <div class="label">Wäsche</div>
+        <div class="label">HP56</div>
       </button>
-      <button class="card noise" data-id="reis" data-variant="snr10" aria-label="Reis im Störgeräusch abspielen">
+      <button class="card noise" data-id="lp56" data-variant="snr10" aria-label="LP56 im Störgeräusch abspielen">
         <span class="rowTag noise">+10 dB</span>
         <span class="icon">🍚</span>
-        <div class="label">Reis</div>
+        <div class="label">LP56</div>
       </button>
-      <button class="card noise" data-id="wolke" data-variant="snr10" aria-label="Wolke im Störgeräusch abspielen">
+      <button class="card noise" data-id="f56b" data-variant="snr10" aria-label="F56b im Störgeräusch abspielen">
         <span class="rowTag noise">+10 dB</span>
         <span class="icon">☁️</span>
-        <div class="label">Wolke</div>
+        <div class="label">F56b</div>
       </button>
     </div>
 
@@ -113,9 +111,9 @@
   <script>
     // Map logical IDs to audio file paths (WAV recommended)
     const audioMap = {
-      waesche: { ruhe: "audio/HP56.wav", snr10: "audio/HP56_snr10.wav" },
-      reis:    { ruhe: "audio/LP56.wav",    snr10: "audio/LP56_snr10.wav" },
-      wolke:   { ruhe: "audio/F56b.wav",   snr10: "audio/F56b_snr10.wav" }
+      hp56: { ruhe: "audio/HP56.wav",  snr10: "audio/HP56_snr10.wav" },
+      lp56: { ruhe: "audio/LP56.wav",  snr10: "audio/LP56_snr10.wav" },
+      f56b: { ruhe: "audio/F56b.wav", snr10: "audio/F56b_snr10.wav" }
     };
 
     let currentAudio = null;
@@ -163,4 +161,3 @@
   </script>
 </body>
 </html>
-
