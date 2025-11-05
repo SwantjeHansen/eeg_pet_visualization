@@ -69,51 +69,47 @@
     <div id="grid" class="grid">
       <!-- Row 1: in Ruhe -->
       <button class="card" data-id="hp56" data-variant="ruhe" aria-label="HP56 in Ruhe abspielen">
-        <span class="rowTag">Ruhe</span>
+        <span class="rowTag">Silence</span>
         <span class="icon">🧺</span>
-        <div class="label">HP56</div>
+        <div class="label">Congruent, High cloze Probability</div>
       </button>
       <button class="card" data-id="lp56" data-variant="ruhe" aria-label="LP56 in Ruhe abspielen">
-        <span class="rowTag">Ruhe</span>
+        <span class="rowTag">Silence</span>
         <span class="icon">🍚</span>
-        <div class="label">LP56</div>
+        <div class="label">Congruent, Low cloze Probability</div>
       </button>
       <button class="card" data-id="f56b" data-variant="ruhe" aria-label="F56b in Ruhe abspielen">
-        <span class="rowTag">Ruhe</span>
+        <span class="rowTag">Silence</span>
         <span class="icon">☁️</span>
-        <div class="label">F56b</div>
+        <div class="label">Incongruent</div>
       </button>
 
       <!-- Row 2: +10 dB SNR -->
       <button class="card noise" data-id="hp56" data-variant="snr10" aria-label="HP56 im Störgeräusch abspielen">
         <span class="rowTag noise">+10 dB</span>
         <span class="icon">🧺</span>
-        <div class="label">HP56</div>
+        <div class="label">Congruent, High cloze Probability</div>
       </button>
       <button class="card noise" data-id="lp56" data-variant="snr10" aria-label="LP56 im Störgeräusch abspielen">
         <span class="rowTag noise">+10 dB</span>
         <span class="icon">🍚</span>
-        <div class="label">LP56</div>
+        <div class="label">Congruent, Low cloze Probability</div>
       </button>
       <button class="card noise" data-id="f56b" data-variant="snr10" aria-label="F56b im Störgeräusch abspielen">
         <span class="rowTag noise">+10 dB</span>
         <span class="icon">☁️</span>
-        <div class="label">F56b</div>
+        <div class="label">Incongruent</div>
       </button>
     </div>
 
-    <footer>
-      Lege deine Audiodateien unter <code>/audio</code> ab. Erwartete Dateinamen:
-      <code>HP56.wav</code>, <code>HP56_snr10.wav</code>, <code>LP56_ruhe.wav</code>, <code>LP56_snr10.wav</code>, <code>F56b_ruhe.wav</code>, <code>F56b_snr10.wav</code>.
-    </footer>
   </div>
 
   <script>
     // Map logical IDs to audio file paths (WAV recommended)
     const audioMap = {
-      hp56: { ruhe: "audio/HP56.wav",  snr10: "audio/HP56_snr10.wav" },
-      lp56: { ruhe: "audio/LP56.wav",  snr10: "audio/LP56_snr10.wav" },
-      f56b: { ruhe: "audio/F56b.wav", snr10: "audio/F56b_snr10.wav" }
+      hp56: { silence: "audio/HP56.wav",  snr10: "audio/HP56_snr10.wav" },
+      lp56: { silence: "audio/LP56.wav",  snr10: "audio/LP56_snr10.wav" },
+      f56b: { silence: "audio/F56b.wav", snr10: "audio/F56b_snr10.wav" }
     };
 
     let currentAudio = null;
@@ -152,7 +148,7 @@
     // Keyboard support: 1..3 -> Ruhe, 4..6 -> +10 dB
     window.addEventListener('keydown', (ev) => {
       const k = ev.key;
-      const map = { '1':['waesche','ruhe'], '2':['reis','ruhe'], '3':['wolke','ruhe'], '4':['waesche','snr10'], '5':['reis','snr10'], '6':['wolke','snr10'] };
+      const map = { '1':['waesche','silence'], '2':['reis','silence'], '3':['wolke','silence'], '4':['waesche','snr10'], '5':['reis','snr10'], '6':['wolke','snr10'] };
       if (!map[k]) return;
       const [id,variant] = map[k];
       const btn = document.querySelector(`button.card[data-id="${id}"][data-variant="${variant}"]`);
