@@ -1,65 +1,155 @@
-<script>
-  // Map logical IDs to audio file paths (WAV recommended)
-  const audioMap = {
-    hp56: { silence: "audio/HP56.wav",  snr10: "audio/HP56_snr10.wav" },
-    lp56: { silence: "audio/LP56.wav",  snr10: "audio/LP56_snr10.wav" },
-    f56b: { silence: "audio/F56b.wav",  snr10: "audio/F56b_snr10.wav" }
-  };
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EEG-PET: Silence vs +10 dB SNR</title>
+  <style>
+    /* Minimal, robust styles so you always see content */
+    html, body { height: 100%; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; background:#0b1220; color:#e7edf7; }
+    .wrap { max-width: 1000px; margin: 24px auto; padding: 0 16px; }
+    h1 { margin: 0 0 8px; font-size: clamp(1.2rem, 3vw, 1.8rem); }
+    p.sub { margin: 0 0 16px; color: #9fb0c6; }
 
-  let currentAudio = null;
-  let currentBtn = null;
+    .legend { display:flex; gap:12px; align-items:center; margin: 18px 0; color:#9fb0c6; }
+    .pill { display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; border:1px solid rgba(255,255,255,0.15); }
+    .dot { width:10px; height:10px; border-radius:50%; background:#7cc4ff; }
+    .dot.noise { background:#a3e8a3; }
 
-  function stopCurrent() {
-    if (currentAudio) { currentAudio.pause(); currentAudio.currentTime = 0; }
-    if (currentBtn) { currentBtn.classList.remove("playing"); currentBtn.classList.remove("noise"); }
-    currentAudio = null;
-    currentBtn = null;
-  }
+    .grid { display:grid; gap:14px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .card { background: rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.12); border-radius:14px; padding:14px; cursor:pointer; }
+    .card:hover { border-color: rgba(124,196,255,0.55); }
+    .rowTag { display:inline-block; font-size:12px; padding:4px 8px; border-radius:8px; border:1px solid rgba(124,196,255,0.35); color:#7cc4ff; background: rgba(124,196,255,0.12); }
+    .rowTag.noise { border-color: rgba(163,232,163,0.35); color:#a3e8a3; background: rgba(163,232,163,0.12); }
+    .icon { font-size: 44px; text-align:center; margin: 10px 0 6px; }
+    .label { text-align:center; color:#9fb0c6; font-size:14px; }
+    .playing { outline:2px solid #7cc4ff; outline-offset: -2px; }
+    .playing.noise { outline-color:#a3e8a3; }
 
-  document.getElementById('grid').addEventListener('click', (e) => {
-    const btn = e.target.closest('button.card');
-    if (!btn) return;
+    footer { margin-top:18px; color:#9fb0c6; font-size:12px; }
+    code { background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <noscript style="color:#fff;background:#c00;display:block;padding:8px 12px;">This page needs JavaScript enabled to play audio.</noscript>
+  <div class="wrap">
+    <h1>EEG-PET: Exemplary sentences · <span style="color:#7cc4ff">Silence</span> vs <span style="color:#a3e8a3">+10 dB SNR</span></h1>
+    <p class="sub">Click the icons. Upper row: <strong>Silence</strong>. Lower row: <strong>with background noise (+10 dB SNR)</strong>.</p>
 
-    const id = btn.getAttribute('data-id');
-    const variant = btn.getAttribute('data-variant');
+    <div class="legend">
+      <span class="pill"><span class="dot"></span> Silence</span>
+      <span class="pill"><span class="dot noise"></span> +10 dB SNR</span>
+    </div>
 
-    // Accept both "ruhe" (from HTML) and "silence" (from audioMap)
-    const key = (variant === 'ruhe') ? 'silence' : variant;
+    <div id="grid" class="grid">
+      <!-- Row 1: Silence -->
+      <button class="card" data-id="hp56" data-variant="silence" aria-label="HP56 in silence">
+        <span class="rowTag">Silence</span>
+        <div class="icon">🧺</div>
+        <div class="label">Congruent, High cloze Probability</div>
+      </button>
+      <button class="card" data-id="lp56" data-variant="silence" aria-label="LP56 in silence">
+        <span class="rowTag">Silence</span>
+        <div class="icon">🍚</div>
+        <div class="label">Congruent, Low cloze Probability</div>
+      </button>
+      <button class="card" data-id="f56b" data-variant="silence" aria-label="F56b in silence">
+        <span class="rowTag">Silence</span>
+        <div class="icon">☁️</div>
+        <div class="label">Incongruent</div>
+      </button>
 
-    const src = audioMap[id]?.[key];
-    if (!src) {
-      console.warn('No audio src for', { id, variant, resolvedKey: key });
-      return;
-    }
+      <!-- Row 2: +10 dB SNR -->
+      <button class="card" data-id="hp56" data-variant="snr10" aria-label="HP56 at +10 dB SNR">
+        <span class="rowTag noise">+10 dB</span>
+        <div class="icon">🧺</div>
+        <div class="label">Congruent, High cloze Probability</div>
+      </button>
+      <button class="card" data-id="lp56" data-variant="snr10" aria-label="LP56 at +10 dB SNR">
+        <span class="rowTag noise">+10 dB</span>
+        <div class="icon">🍚</div>
+        <div class="label">Congruent, Low cloze Probability</div>
+      </button>
+      <button class="card" data-id="f56b" data-variant="snr10" aria-label="F56b at +10 dB SNR">
+        <span class="rowTag noise">+10 dB</span>
+        <div class="icon">☁️</div>
+        <div class="label">Incongruent</div>
+      </button>
+    </div>
 
-    if (currentBtn === btn) { // toggle off if same button
-      stopCurrent();
-      return;
-    }
+    <footer>
+      Put your audio files next to this file in <code>./audio</code>:
+      <code>HP56.wav</code>, <code>HP56_snr10.wav</code>, <code>LP56.wav</code>, <code>LP56_snr10.wav</code>, <code>F56b.wav</code>, <code>F56b_snr10.wav</code>.
+    </footer>
+  </div>
 
-    stopCurrent();
-    const a = new Audio(src);
-    a.addEventListener('ended', stopCurrent);
-    currentAudio = a;
-    currentBtn = btn;
-    btn.classList.add('playing');
-    if (key === 'snr10') btn.classList.add('noise');
-
-    a.play().catch(err => {
-      console.error('Playback failed:', err);
-    });
-  });
-
-  // Keyboard support: 1..3 -> Silence (top), 4..6 -> +10 dB (bottom)
-  window.addEventListener('keydown', (ev) => {
-    const k = ev.key;
-    const map = {
-      '1': ['hp56','ruhe'],   '2': ['lp56','ruhe'],   '3': ['f56b','ruhe'],
-      '4': ['hp56','snr10'],  '5': ['lp56','snr10'],  '6': ['f56b','snr10']
+  <script>
+    // Use RELATIVE paths so it works for both root and /docs deployments
+    const audioMap = {
+      hp56: { silence: "./audio/HP56.wav",  snr10: "./audio/HP56_snr10.wav" },
+      lp56: { silence: "./audio/LP56.wav",  snr10: "./audio/LP56_snr10.wav" },
+      f56b: { silence: "./audio/F56b.wav",  snr10: "./audio/F56b_snr10.wav" }
     };
-    if (!map[k]) return;
-    const [id,variant] = map[k];
-    const btn = document.querySelector(`button.card[data-id="${id}"][data-variant="${variant}"]`);
-    if (btn) btn.click();
-  });
-</script>
+
+    let currentAudio = null;
+    let currentBtn = null;
+
+    function stopCurrent() {
+      if (currentAudio) { currentAudio.pause(); currentAudio.currentTime = 0; }
+      if (currentBtn) { currentBtn.classList.remove("playing"); currentBtn.classList.remove("noise"); }
+      currentAudio = null;
+      currentBtn = null;
+    }
+
+    function playSrc(btn, src, isNoise){
+      stopCurrent();
+      const a = new Audio(src);
+      a.addEventListener('ended', stopCurrent);
+      a.addEventListener('error', () => console.error('Audio failed to load:', src));
+      currentAudio = a; currentBtn = btn;
+      btn.classList.add('playing');
+      if (isNoise) btn.classList.add('noise');
+      a.play().catch(err => console.error('Playback failed:', err));
+    }
+
+    document.getElementById('grid').addEventListener('click', (e) => {
+      const btn = e.target.closest('button.card');
+      if (!btn) return;
+      const id = btn.getAttribute('data-id');
+      const variant = btn.getAttribute('data-variant');
+      const src = audioMap[id]?.[variant];
+      if (!src) { console.warn('No src for', id, variant); return; }
+      if (currentBtn === btn) { stopCurrent(); return; }
+      playSrc(btn, src, variant === 'snr10');
+    });
+
+    // Keyboard: 1..3 → Silence, 4..6 → +10 dB
+    window.addEventListener('keydown', (ev) => {
+      const map = {
+        '1':['hp56','silence'], '2':['lp56','silence'], '3':['f56b','silence'],
+        '4':['hp56','snr10'],   '5':['lp56','snr10'],   '6':['f56b','snr10']
+      };
+      const val = map[ev.key]; if (!val) return;
+      const [id,variant] = val;
+      const btn = document.querySelector(`button.card[data-id="${id}"][data-variant="${variant}"]`);
+      if (btn) btn.click();
+    });
+
+    // Optional: quick self-test panel to verify files exist
+    (async function selfTest(){
+      const files = Object.values(audioMap).flatMap(m => [m.silence, m.snr10]);
+      const box = document.createElement('div');
+      box.style.cssText="margin-top:12px;padding:10px;border:1px solid rgba(255,255,255,.2);border-radius:8px;color:#9fb0c6";
+      box.innerHTML = '<b>Self-test</b>: checking audio file availability...<br/>';
+      document.querySelector('.wrap').appendChild(box);
+      for (const url of files) {
+        try {
+          const res = await fetch(url, { method: 'HEAD' });
+          box.innerHTML += `${res.ok ? '✅' : '❌'} ${url} ${res.ok ? '' : `(HTTP ${res.status})`}<br/>`;
+        } catch(e) { box.innerHTML += `❌ ${url} (fetch error)<br/>`; }
+      }
+    })();
+  </script>
+</body>
+</html>
